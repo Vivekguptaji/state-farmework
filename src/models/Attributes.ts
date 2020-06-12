@@ -1,12 +1,12 @@
 export class Attributes<T> {
-  constructor(public attr: T) {}
+  constructor(public data: T) {}
   get = <K extends keyof T>(propertyName: K): T[K] => {
-    return this.attr[propertyName];
+    return this.data[propertyName];
   };
   set = (updatedData: T): void => {
-    Object.assign(this.attr, updatedData);
+    Object.assign(this.data, updatedData);
   };
   getAll = (): T => {
-    return this.attr;
+    return this.data;
   };
 }

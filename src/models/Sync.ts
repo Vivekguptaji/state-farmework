@@ -3,16 +3,16 @@ interface HasId {
   id?: number;
 }
 export class Sync<T extends HasId> {
-  constructor(protected db_url: string) {}
+  constructor(public root_Url: string) {}
   save = (data: T): AxiosPromise => {
-    const { id } = data;
+    const id = data["id"];
     if (id) {
-      return axios.put(`${this.db_url}/${id}`, data);
+      return axios.put(`${this.root_Url}/${id}`, data);
     } else {
-      return axios.post(this.db_url, data);
+      return axios.post(`${this.root_Url}`, data);
     }
   };
   fetch = (id: number): AxiosPromise => {
-    return axios.get(`${this.db_url}/${id}`);
+    return axios.get(`${this.root_Url}/${id}`);
   };
 }

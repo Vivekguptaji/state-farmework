@@ -1,12 +1,9 @@
-type callbackfn = () => void;
 export class Eventing {
-  events: {
-    [key: string]: callbackfn;
-  } = {};
-  on = (eventName: string, handler: callbackfn): void => {
-    const handlers = this.events[eventName];
-    if (!handlers) {
-      this.events[eventName] = handler;
+  events: { [keyName: string]: () => void } = {};
+  on = (eventName: string, callback: () => void): void => {
+    const handler = this.events[eventName];
+    if (!handler) {
+      this.events[eventName] = callback;
     }
   };
   trigger = (eventName: string): void => {

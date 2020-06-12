@@ -1,28 +1,19 @@
-import { Model } from "./Model";
 import { Eventing } from "./Eventing";
 import { Sync } from "./Sync";
 import { Attributes } from "./Attributes";
-import { Collection } from "./Collection";
-export interface UserData {
+import { Model } from "./Model";
+export interface UserProp {
   id?: number;
   name?: string;
   age?: number;
 }
-const db_URL = "http://localhost:3000/Users";
-export class User extends Model<UserData> {
-  static buildUser(data: UserData) {
+const root_Url = "http://localhost:3000/users";
+export class User extends Model<UserProp> {
+  static buildUser(data: UserProp) {
     return new User(
-      new Attributes<UserData>(data),
-      new Sync<UserData>(db_URL),
+      new Attributes<UserProp>(data),
+      new Sync<UserProp>(root_Url),
       new Eventing()
-    );
-  }
-  static getUserCollection() {
-    return new Collection<User, UserData>(
-      db_URL,
-      (data: UserData): User => {
-        return User.buildUser(data);
-      }
     );
   }
   setRandomAge() {

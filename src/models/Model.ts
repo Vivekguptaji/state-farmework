@@ -1,4 +1,5 @@
 import { AxiosPromise } from "axios";
+import { Attributes } from "./Attributes";
 
 interface Attributes_Model<T> {
   get<K extends keyof T>(propertyName: K): T[K];
@@ -6,21 +7,23 @@ interface Attributes_Model<T> {
   getAll(): T;
 }
 interface Eventing_Model {
-  on(eventName: string, handler: () => void): void;
+  on(eventName: string, callback: () => void): void;
   trigger(eventName: string): void;
 }
+
 interface Sync_Model<T> {
   save(data: T): AxiosPromise;
   fetch(id: number): AxiosPromise;
 }
-interface HasID {
+
+interface HasId {
   id?: number;
 }
-export class Model<T extends HasID> {
+export class Model<T extends HasId> {
   constructor(
-    private attributes: Attributes_Model<T>,
-    private sync: Sync_Model<T>,
-    private events: Eventing_Model
+    public attributes: Attributes_Model<T>,
+    public sync: Sync_Model<T>,
+    public events: Eventing_Model
   ) {}
   get on() {
     return this.events.on;
@@ -31,25 +34,23 @@ export class Model<T extends HasID> {
   get get() {
     return this.attributes.get;
   }
-  set(data: T) {
-    this.attributes.set(data);
+  set(updatedData: T) {
+    this.attributes.set(updatedData);
     this.events.trigger("change");
   }
-  fetch() {
-    const id = this.attributes.get("id");
-    if (!id) {
-      console.log("No id found for this record");
-      return;
-    }
-    this.sync.fetch(+id).then((res) => {
-      this.set(res.data);
-      this.trigger("change");
-    });
-  }
-  save() {
+  save = (): void => {
     const data = this.attributes.getAll();
-    this.sync.save(data).then((res) => {
-      this.trigger("change");
+    this.sync.save(data).then((response) => {
+      this.attributes.set(response.data);
+      this.events.trigger("change");
     });
-  }
+  };
+  fetch = (): void => {
+    const data = this.attributes.getAll();
+    const { id } = data;
+    this.sync.fetch(id).then((response) => {
+      this.attributes.set(response.data);
+      this.events.trigger("change");
+    });
+  };
 }
