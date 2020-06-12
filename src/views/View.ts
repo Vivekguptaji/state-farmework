@@ -1,52 +1,49 @@
 import { User } from "../models/User";
 import { Model } from "../models/Model";
-
-export abstract class View<T extends Model<K>, K> {
-  regions: { [key: string]: HTMLElement } = {};
+export abstract class View<T extends Model<U>, U> {
   constructor(public parentEl: HTMLElement, public model: T) {
-    this.bindRender();
+    this.bindModelRender();
   }
-  bindRender() {
+  bindModelRender = () => {
     this.model.on("change", () => {
-      console.log("user data has been changed");
       this.render();
     });
-  }
+  };
+  formElement: { [keyName: string]: HTMLElement } = {};
+  formEvents = (): { [keyName: string]: () => void } => {
+    return {};
+  };
+  bindFormElement = (): { [keyName: string]: string } => {
+    return {};
+  };
+  bindFormEvents = (fragement: DocumentFragment) => {
+    const formevents = this.formEvents();
+    for (let event in formevents) {
+      const [bindEvent, selector] = event.split(":");
+      const el = fragement.querySelector(selector);
+      el.addEventListener(bindEvent, formevents[event]);
+    }
+  };
   abstract template(): string;
-  mapRegions = () => {
-    return {};
-  };
-  mapEvents = (): { [keyName: string]: () => void } => {
-    return {};
-  };
-  bindRegions(fragement: DocumentFragment) {
-    const regions = this.mapRegions();
-    for (let key in regions) {
-      const selector = regions[key];
-      const el = fragement.querySelector(selector);
-      if (el) {
-        this.regions[key] = el;
-      }
+  mapFormElement = (fragement: DocumentFragment): void => {
+    const formElements = this.bindFormElement();
+    for (let formElement in formElements) {
+      const el = fragement.querySelector(
+        formElements[formElement]
+      ) as HTMLElement;
+      this.formElement[formElement] = el;
     }
-  }
-  onRender(): void {}
-  bindEvents(fragement: DocumentFragment) {
-    const events = this.mapEvents();
-    const keys = Object.keys(events);
-    for (let key of keys) {
-      const handler = events[key];
-      const [event, selector] = key.split(":");
-      const el = fragement.querySelector(selector);
-      el.addEventListener(event, handler);
+  };
+  formRender = (): void => {};
+  render = (): void => {
+    if (this.parentEl) {
+      this.parentEl.innerHTML = "";
+      const template = document.createElement("template");
+      template.innerHTML = this.template();
+      this.bindFormEvents(template.content);
+      this.mapFormElement(template.content);
+      this.formRender();
+      this.parentEl.appendChild(template.content);
     }
-  }
-  render() {
-    this.parentEl.innerHTML = "";
-    const template = document.createElement("template");
-    template.innerHTML = this.template();
-    this.bindEvents(template.content);
-    this.bindRegions(template.content);
-    this.onRender();
-    this.parentEl.appendChild(template.content);
-  }
+  };
 }

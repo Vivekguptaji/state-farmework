@@ -1,25 +1,23 @@
+import { User, UserProp } from "../models/User";
 import { View } from "./View";
-import { User, UserData } from "../models/User";
+import { UserEdit } from "./UserEdit";
+import { UserForm } from "./UserForm";
 
-export class UserShow extends View<User, UserData> {
-  updateName = () => {
-    const name = this.parentEl.querySelector("input").value;
-    this.model.set({ name });
-    console.log("update name clicked");
-  };
-  userSave = () => {
-    this.model.save();
-  };
-  mapEvents = () => {
+export class UserShow extends View<User, UserProp> {
+  bindFormElement = (): { [keyName: string]: string } => {
     return {
-      "click:#update-name": this.updateName,
-      "click:#save": this.userSave,
+      UserForm: "#user-form",
+      UserEdit: "#user-edit",
     };
   };
+  formRender = () => {
+    new UserEdit(this.formElement.UserEdit, this.model).render();
+    new UserForm(this.formElement.UserForm, this.model).render();
+  };
   template(): string {
-    return `<input placeholder=${this.model.get("name")}> 
-    <button id="update-name">Update Name</button>
-    <button id="save">Save</button>
+    return `
+    <div id="user-form"></div>
+    <div id="user-edit"></div>
     `;
   }
 }

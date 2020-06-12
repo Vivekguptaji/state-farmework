@@ -1,21 +1,22 @@
-import { User, UserData } from "../models/User";
+import { Model } from "../models/Model";
+import { User, UserProp } from "../models/User";
 import { View } from "./View";
 
-export class UserForm extends View<User, UserData> {
-  setRandomAge = () => {
-    this.model.setRandomAge();
-    console.log("setRandomAge clicked");
-  };
-  mapEvents = (): { [keyName: string]: () => void } => {
+export class UserForm extends View<User, UserProp> {
+  formEvents = (): { [keyName: string]: () => void } => {
     return {
-      "click:.set-age": this.setRandomAge,
+      "click:#set-age": this.onClickSetAge,
     };
   };
+
+  onClickSetAge = () => {
+    this.model.setRandomAge();
+  };
   template(): string {
-    return `<h1>User Details</h1>
-    <div>User Name: ${this.model.get("name")}</div>
-    <div>User Age: ${this.model.get("age")}</div>
-    <button class="set-age">Set Random Age</button>
+    return `<h1>User Form</h1>
+    <div>User Name:${this.model.get("name")}</div>
+    <div>User Age:${this.model.get("age")}</div>
+    <button id="set-age">Set Random Age</button>
     `;
   }
 }
